@@ -1,0 +1,223 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Usuarios del sistema
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relaciones
+  userRoles     UserRole[]
+  createdRequests Request[]
+  tasks         Task[]
+  auditLogs     AuditLog[]
+  requestAssignees RequestAssignee[]
+  createdWorkflows Workflow[]
+
+  @@map("users")
+}
+
+// Roles del sistema
+model Role {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  userRoles UserRole[]
+
+  @@map("roles")
+}
+
+// Tabla pivot entre usuarios y roles
+model UserRole {
+  id     String @id @default(cuid())
+  userId String
+  roleId String
+
+  // Relaciones
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId])
+  @@map("user_roles")
+}
+
+// Fuentes de datos para listas desplegables dinámicas
+model DataSource {
+  id              String   @id @default(cuid())
+  name            String
+  sourceType      String   // 'table' o 'query'
+  sourceReference String   // Nombre de tabla o consulta SQL
+  valueField      String   // Columna para el valor
+  labelField      String   // Columna para el texto visible
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("data_sources")
+}
+
+// Tipos de solicitud (plantillas)
+model RequestType {
+  id              String   @id @default(cuid())
+  name            String
+  description     String?
+  flowDefinition  String   // JSON con la definición del flujo
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relaciones
+  requests Request[]
+
+  @@map("request_types")
+}
+
+// Instancias de solicitudes
+model Request {
+  id            String      @id @default(cuid())
+  requestTypeId String
+  currentStep   String      // ID del nodo actual en el flujo
+  status        String      // 'draft', 'in_progress', 'approved', 'rejected', 'completed'
+  title         String
+  createdBy     String
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  // Relaciones
+  requestType     RequestType      @relation(fields: [requestTypeId], references: [id])
+  creator         User             @relation(fields: [createdBy], references: [id])
+  requestData     RequestData[]
+  tasks           Task[]
+  auditLogs       AuditLog[]
+  requestAssignees RequestAssignee[]
+
+  @@map("requests")
+}
+
+// Datos de los formularios (soporta estructura cabecera/detalle)
+model RequestData {
+  id         String   @id @default(cuid())
+  requestId  String
+  dataType   String   // 'header' o 'detail'
+  fieldName  String
+  fieldValue String   // JSON para valores complejos
+  rowIndex   Int?     // Para datos tipo detalle
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  // Relaciones
+  request Request @relation(fields: [requestId], references: [id], onDelete: Cascade)
+
+  @@map("request_data")
+}
+
+// Tareas en la bandeja de entrada de los usuarios
+model Task {
+  id          String   @id @default(cuid())
+  requestId   String
+  assignedTo  String
+  taskType    String   // 'approval', 'form_completion', etc.
+  title       String
+  description String?
+  status      String   // 'pending', 'approved', 'rejected', 'completed'
+  dueDate     DateTime?
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  request Request @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  assignee User   @relation(fields: [assignedTo], references: [id])
+
+  @@map("tasks")
+}
+
+// Historial de auditoría
+model AuditLog {
+  id          String   @id @default(cuid())
+  requestId   String
+  userId      String
+  action      String   // 'created', 'submitted', 'approved', 'rejected', etc.
+  description String?
+  metadata    String?  // JSON con datos adicionales
+  createdAt   DateTime @default(now())
+
+  // Relaciones
+  request Request @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id])
+
+  @@map("audit_log")
+}
+
+// Relación entre solicitudes y múltiples usuarios
+model RequestAssignee {
+  id         String   @id @default(cuid())
+  requestId  String
+  userId     String
+  role       String?  // 'observer', 'stakeholder', etc.
+  createdAt  DateTime @default(now())
+
+  // Relaciones
+  request Request @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([requestId, userId])
+  @@map("request_assignees")
+}
+
+// Workflows para diseñar procesos
+model Workflow {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  category    String   @default("General")
+  isActive    Boolean  @default(true)
+  createdBy   String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relaciones
+  creator User           @relation(fields: [createdBy], references: [id])
+  steps   WorkflowStep[]
+
+  @@map("workflows")
+}
+
+// Pasos de los workflows
+model WorkflowStep {
+  id            String   @id @default(cuid())
+  workflowId    String
+  name          String
+  description   String?
+  type          String   // 'form', 'approval', 'task', 'notification', 'condition', 'timer'
+  assigneeRole  String
+  order         Int
+  config        String?  // JSON con configuración específica del paso
+  position      String?  // JSON con posición x, y para el editor visual
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relaciones
+  workflow Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@map("workflow_steps")
+}

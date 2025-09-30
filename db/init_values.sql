@@ -14,3 +14,11 @@ INSERT INTO `roles` (`id`, `name`, `description`, `createdAt`, `updatedAt`) VALU
 -- Example for assigning the admin role to the admin user:
 -- INSERT INTO `user_roles` (`id`, `userId`, `roleId`) VALUES
 -- ('clxuserrole0000001', 'clxuser000000000001', 'clxrole000000000001');
+
+-- Insert admin user
+INSERT INTO `users` (`id`, `email`, `name`, `password`, `createdAt`, `updatedAt`) VALUES
+('clxuser000000000001', 'admin@example.com', 'Admin User', '$2b$10$HKZ54ALpGyG6ouiHqrl76ufS1i0EZeHV2zQxCuzQTH0BOA1v3.5VK', NOW(3), NOW(3));
+
+-- Assign admin role to admin user
+INSERT INTO `user_roles` (`id`, `userId`, `roleId`) VALUES
+('clxuserrole0000001', 'clxuser000000000001', 'clxrole000000000001');

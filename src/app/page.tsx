@@ -25,7 +25,8 @@ import {
 import { useAuth } from '@/hooks/use-auth';
 import { useLoading } from '@/contexts/loading-context';
 import { Sidebar } from '@/components/sidebar';
-import { LoadingSpinner, CardSkeleton } from '@/components/ui/loading';
+import { LoadingSpinner } from '@/components/ui/loading';
+import { CardSkeleton } from '@/components/ui/skeleton';
 
 const statsCards = [
   {

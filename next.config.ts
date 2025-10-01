@@ -20,6 +20,19 @@ const nextConfig: NextConfig = {
     // 构建时忽略ESLint错误
     ignoreDuringBuilds: true,
   },
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: "connect-src 'self' http://localhost:3001 ws://localhost:3000;",
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

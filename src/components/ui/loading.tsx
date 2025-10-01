@@ -66,7 +66,7 @@ interface LoadingOverlayProps {
 
 export function LoadingOverlay({ isLoading, text = 'Loading...', children }: LoadingOverlayProps) {
   return (
-    <div className="relative">
+    <div className="relative w-full h-full">
       {children}
       {isLoading && (
         <div className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-10 rounded-lg">

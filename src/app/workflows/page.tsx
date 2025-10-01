@@ -31,7 +31,8 @@ import {
 } from 'lucide-react';
 import { Sidebar } from '@/components/sidebar';
 import { FlowDesigner } from '@/components/workflow/FlowDesigner';
-import { LoadingSpinner, CardSkeleton } from '@/components/ui/loading';
+import { LoadingSpinner } from '@/components/ui/loading';
+import { CardSkeleton } from '@/components/ui/skeleton';
 import { useLoading } from '@/contexts/loading-context';
 import { Node, Edge } from '@xyflow/react';
 

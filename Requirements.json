@@ -1,0 +1,223 @@
+{
+  "projectInfo": {
+    "name": "Request Management Platform",
+    "description": "Una plataforma visual y flexible para diseñar, ejecutar y gestionar cualquier tipo de flujo de solicitud (servicio, stock, etc.), con formularios dinámicos, flujos de aprobación y un historial completo.",
+    "version": "1.0.0"
+  },
+  "technicalStack": {
+    "frontend": {
+      "framework": "React",
+      "language": "JavaScript",
+      "suggestedLibraries": [
+        "@xyflow/react (para el canvas del flujo)",
+        "Redux Toolkit o Zustand (para el estado global)",
+        "Material-UI o Ant Design (con theming personalizado)"
+      ]
+    },
+    "backend": {
+      "runtime": "Node.js",
+      "framework": "Express.js",
+      "authentication": "JWT (JSON Web Tokens)",
+      "orm": "Sequelize o Prisma (recomendado para MySQL)"
+    },
+    "database": {
+      "system": "MySQL",
+      "keyPrinciple": "Flexibilidad mediante el uso de columnas JSON para definiciones y datos dinámicos."
+    }
+  },
+  "uiUxRequirements": {
+    "colorPalette": {
+      "primary": "rgb(0, 30, 50)",
+      "secondary": "rgb(255, 199, 44)",
+      "background": "rgb(236, 235, 228)",
+      "text": "rgb(66, 85, 99)",
+      "success": "rgb(76, 140, 43)",
+      "warning": "rgb(216, 96, 24)",
+      "error": "rgb(183, 49, 44)",
+      "info": "rgb(72, 169, 197)",
+      "allColors": [
+        "--color-epiroc-grey: rgb(66, 85, 99)",
+        "--color-epiroc-yellow: rgb(255, 199, 44)",
+        "--color-epiroc-dark-grey: rgb(119, 116, 110)",
+        "--color-epiroc-medium-grey: rgb(180, 180, 170)",
+        "--color-epiroc-light-grey: rgb(236, 235, 228)",
+        "--color-epiroc-dark-blue: rgb(0, 30, 50)",
+        "--color-epiroc-violet: rgb(97, 44, 81)",
+        "--color-epiroc-light-blue: rgb(72, 169, 197)",
+        "--color-epiroc-red: rgb(183, 49, 44)",
+        "--color-epiroc-orange: rgb(216, 96, 24)",
+        "--color-epiroc-green: rgb(76, 140, 43)",
+        "--color-epiroc-electric-green: rgb(134, 200, 188)",
+        "--color-epiroc-dark-yellow: rgb(230, 179, 39)",
+        "--color-epiroc-dark-red: rgb(163, 40, 35)",
+        "--color-epiroc-dark-green: rgb(66, 120, 33)"
+      ]
+    },
+    "views": {
+      "designerView": {
+        "purpose": "Para usuarios administradores o diseñadores de flujos.",
+        "components": ["FlowCanvas", "NodeToolbar", "PropertyPanel"]
+      },
+      "userView": {
+        "purpose": "Para usuarios finales que interactúan con las solicitudes.",
+        "components": ["DynamicFormRenderer", "ProgressBar", "RequestDetails"]
+      }
+    }
+  },
+  "coreFeatures": {
+    "visualFlowDesigner": {
+      "description": "Un canvas visual para construir flujos de trabajo de tipo drag-and-drop.",
+      "components": {
+        "canvas": {
+          "type": "Interfaz de diagrama de flujo",
+          "functionality": "Permite arrastrar, soltar y conectar nodos para definir un proceso de principio a fin."
+        },
+        "nodes": {
+          "type": "Elementos del flujo",
+          "nodeTypes": [
+            {
+              "name": "StartNode",
+              "shape": "Círculo",
+              "purpose": "Punto de entrada único del flujo."
+            },
+            {
+              "name": "FormNode",
+              "shape": "Cuadrado",
+              "purpose": "Representa un formulario que el usuario debe completar. Es configurable para contener distintos campos."
+            },
+            {
+              "name": "DecisionNode",
+              "shape": "Rombo",
+              "purpose": "Representa una bifurcación lógica (if/else o case) que dirige el flujo basado en los datos del formulario."
+            },
+            {
+              "name": "ApprovalNode",
+              "shape": "Cuadrado con ícono",
+              "purpose": "Un paso que crea una tarea en la worklist de uno o más usuarios para su aprobación o rechazo."
+            },
+            {
+              "name": "EndNode",
+              "shape": "Círculo",
+              "purpose": "Punto de finalización del flujo."
+            }
+          ]
+        },
+        "propertyPanel": {
+          "purpose": "Un panel que se actualiza al seleccionar un nodo, permitiendo configurar sus propiedades específicas (campos de formulario, condiciones de decisión, etc.)."
+        },
+        "persistence": {
+          "action": "Guardar definición de flujo",
+          "details": "El flujo completo (nodos, bordes, y propiedades de cada nodo) debe ser serializado a un objeto JSON y guardado en la base de datos."
+        }
+      }
+    },
+    "dynamicForms": {
+      "description": "Sistema para crear formularios flexibles y con datos conectados a la base de datos.",
+      "features": {
+        "fieldTypes": [
+          { "type": "text", "label": "Texto" },
+          { "type": "number", "label": "Número" },
+          { "type": "date", "label": "Fecha" },
+          { "type": "textarea", "label": "Área de Texto" },
+          { "type": "dropdown", "label": "Lista Desplegable", "special": "Conectable a Data Sources" }
+        ],
+        "reusableDataSources": {
+          "purpose": "Permitir la creación de listas desplegables dinámicas y reutilizables que obtienen sus datos de tablas o consultas SQL.",
+          "configuration": {
+            "name": "Nombre descriptivo (Ej: 'Lista de Países')",
+            "sourceType": "Enum: ['table', 'query']",
+            "sourceReference": "Nombre de la tabla o consulta SQL completa",
+            "valueField": "Columna para el valor del option",
+            "labelField": "Columna para el texto visible del option"
+          },
+          "implementation": "El diseñador de flujos debe poder seleccionar una de estas fuentes de datos configuradas para un campo de tipo 'dropdown'."
+        },
+        "relatedForms_MasterDetail": {
+          "purpose": "Soportar formularios con una estructura cabecera/detalle (Ej: Solicitud de Stock con una lista de artículos).",
+          "designerImplementation": "Dentro de un FormNode, se debe poder definir un conjunto de campos 'cabecera' y otro conjunto de campos 'detalle'.",
+          "dataStructure": "Al enviar, los datos se estructuran en un JSON anidado: { headerData: {...}, detailData: [{...}, {...}] }.",
+          "databaseStorage": "El backend debe guardar el 'header' en un registro y cada ítem del 'detail' en un registro separado pero vinculado al 'header'."
+        }
+      }
+    },
+    "workflowEngine": {
+      "description": "El motor en el backend que interpreta y ejecuta las definiciones de flujo.",
+      "responsibilities": [
+        "Recibir acciones del frontend (ej: 'formulario enviado').",
+        "Identificar el paso actual en el flujo de una solicitud.",
+        "Evaluar nodos de decisión (DecisionNode) para determinar el siguiente paso.",
+        "Crear tareas de aprobación (ApprovalNode) en la worklist de los usuarios correspondientes.",
+        "Actualizar el estado y el paso actual de la solicitud en la base de datos.",
+        "Registrar cada acción en el historial de auditoría."
+      ],
+      "conditionalLogic": {
+        "type": "Soporte para 'case' o múltiples 'if'",
+        "implementation": "Los bordes que salen de un DecisionNode deben tener una condición asociada que el motor evaluará contra los datos del formulario."
+      }
+    },
+    "userInteractionAndTasks": {
+      "worklist": {
+        "purpose": "Una bandeja de entrada personal para cada usuario, mostrando las tareas que requieren su atención (aprobar, completar un formulario, etc.).",
+        "features": ["Filtros de estado", "Búsqueda", "Ordenamiento"]
+      },
+      "requestHistory": {
+        "purpose": "Un registro inmutable de auditoría para cada solicitud.",
+        "dataCaptured": [
+          "Quién realizó la acción (usuario).",
+          "Qué acción se realizó (ej: 'Created', 'Submitted', 'Approved', 'Rejected').",
+          "Fecha y hora exactas de la acción.",
+          "Detalles adicionales (ej: cambio de estado, comentarios)."
+        ]
+      },
+      "multiRoleAssignment": {
+        "purpose": "Un usuario puede tener uno o varios roles (Ej: 'Solicitante' y 'Aprobador de Compras').",
+        "implementation": "Se requiere una tabla pivot entre `users` y `roles`."
+      },
+      "requestAssignees": {
+        "purpose": "Permitir anexar múltiples usuarios a una solicitud, no solo el creador o el aprobador actual.",
+        "useCase": "Para notificaciones, visibilidad o seguimiento por parte de un equipo."
+      }
+    }
+  },
+  "databaseSchema": {
+    "keyTables": [
+      { "name": "users", "purpose": "Almacenar información de los usuarios." },
+      { "name": "roles", "purpose": "Definir los roles del sistema." },
+      { "name": "user_roles", "purpose": "Tabla pivot para la relación muchos-a-muchos entre usuarios y roles." },
+      { "name": "data_sources", "purpose": "Configurar las listas desplegables reutilizables." },
+      { "name": "request_types", "purpose": "Plantilla para cada tipo de solicitud. Contiene el `flow_definition` (JSON)." },
+      { "name": "requests", "purpose": "Instancia de una solicitud. Contiene el estado y el paso actual." },
+      { "name": "request_data", "purpose": "Almacenar los datos de los formularios. Soporta estructura cabecera/detalle." },
+      { "name": "tasks", "purpose": "Representa las tareas en la worklist de los usuarios." },
+      { "name": "audit_log", "purpose": "Registro histórico de auditoría para cada solicitud." },
+      { "name": "request_assignees", "purpose": "Relacionar una solicitud con múltiples usuarios." }
+    ],
+    "flexibilityPrinciple": "Las tablas `request_types`, `request_data` y `data_sources` deben utilizar columnas de tipo JSON para almacenar estructuras dinámicas y no fijas."
+  },
+  "keyApiEndpoints": {
+    "authentication": [
+      "POST /api/auth/login"
+    ],
+    "flows": [
+      "GET /api/flows",
+      "POST /api/flows",
+      "PUT /api/flows/:id"
+    ],
+    "requests": [
+      "GET /api/requests",
+      "POST /api/requests",
+      "GET /api/requests/:id",
+      "POST /api/requests/:id/submit",
+      "GET /api/requests/:id/history"
+    ],
+    "tasks": [
+      "GET /api/tasks/my-tasks",
+      "POST /api/tasks/:id/approve",
+      "POST /api/tasks/:id/reject"
+    ],
+    "dataSources": [
+      "GET /api/data-sources",
+      "GET /api/data-sources/:id/options"
+    ]
+  }
+}

@@ -168,7 +168,7 @@ export function Sidebar({ className }: SidebarProps) {
       {/* Desktop sidebar */}
       <div 
         className={cn(
-          "hidden lg:flex flex-col bg-white border-r border-gray-200 transition-all duration-300 ease-in-out",
+          "hidden lg:flex flex-col bg-white border-r border-gray-200 transition-all duration-300 ease-in-out fixed h-full z-30",
           isCollapsed ? "w-16" : "w-80",
           className
         )}

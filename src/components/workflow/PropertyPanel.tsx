@@ -190,7 +190,7 @@ export function PropertyPanel({ selectedNode, onNodeUpdate, dataSources = [] }: 
               <SelectValue placeholder="Select relationship field" />
             </SelectTrigger>
             <SelectContent>
-              {formFields.filter(field => field.type === 'text' || field.type === 'number' || field.type === 'dropdown').map((field) => (
+              {formFields.filter(field => (field.type === 'text' || field.type === 'number' || field.type === 'dropdown') && field.name).map((field) => (
                 <SelectItem key={field.id} value={field.name}>
                   {field.label || field.name}
                 </SelectItem>
